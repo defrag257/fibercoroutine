@@ -100,10 +100,10 @@ inline FiberScheduler::~FiberScheduler()
 inline FiberScheduler::FiberScheduler()
 	: impl_(std::make_unique<PrivateImpl_>())
 {
-	// 初始化当前线程的fiber环境
+	// 如果当前线程还没有初始化fiber环境，则初始化
 	impl_->scheduler = ConvertThreadToFiberEx(nullptr, FIBER_FLAG_FLOAT_SWITCH);
-	// 注意：如果scheduler所在fiber使用浮点数，
-	// 务必确保创建时也使用了FIBER_FLAG_FLOAT_SWITCH开关
+	// 如果当前已经是fiber环境，则使用当前fiber
+	// 注意：务必确保创建时也使用了FIBER_FLAG_FLOAT_SWITCH开关
 	if (!impl_->scheduler)
 		impl_->scheduler = GetCurrentFiber();
 }
