@@ -105,12 +105,14 @@ inline void FiberScheduler::YieldFiber()
 {
 	// ·µ»Øscheduler
 	assert(GetCurrentFiber() != impl_->scheduler);
+	assert(GetFiberData() == &*impl_->currentiter);
 	SwitchToFiber(impl_->scheduler);
 }
 
 inline void FiberScheduler::YieldFiberForClock(long long pos_filetime_neg_100ns)
 {
 	assert(GetCurrentFiber() != impl_->scheduler);
+	assert(GetFiberData() == &*impl_->currentiter);
 	HANDLE timer = CreateWaitableTimer(nullptr, true, nullptr);
 	LARGE_INTEGER time_li;
 	time_li.QuadPart = pos_filetime_neg_100ns;
