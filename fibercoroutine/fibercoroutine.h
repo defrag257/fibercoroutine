@@ -19,6 +19,9 @@ public:
 	void YieldFiberForClock(long long pos_filetime_neg_100ns); // 定时
 	// [scheduler&fiber接口]
 	void EnqueueFiber(std::function<void()> fn); // 添加新的fiber
+	// 不能复制！
+	FiberScheduler(const FiberScheduler &) = delete;
+	FiberScheduler &operator=(const FiberScheduler &) = delete;
 private:
 	struct PrivateImpl_;
 	std::unique_ptr<PrivateImpl_> impl_;
@@ -92,19 +95,17 @@ inline FiberScheduler::~FiberScheduler()
 			OutputDebugStringA("WARNING: fiber finished but not cleaned.\n");
 		}
 	}
-	ConvertFiberToThread();
 }
 
 inline FiberScheduler::FiberScheduler()
 	: impl_(std::make_unique<PrivateImpl_>())
 {
-	// 初始化scheduler本身的fiber
-	// 这里我们限定：
-	// 1、当前线程之前不能是fiber
-	// 2、scheduler不能嵌套使用
-	// 否则如果两个scheduler交替返回则会造成错误
+	// 初始化当前线程的fiber环境
 	impl_->scheduler = ConvertThreadToFiberEx(nullptr, FIBER_FLAG_FLOAT_SWITCH);
-	assert(impl_->scheduler);
+	// 注意：如果scheduler所在fiber使用浮点数，
+	// 务必确保创建时也使用了FIBER_FLAG_FLOAT_SWITCH开关
+	if (!impl_->scheduler)
+		impl_->scheduler = GetCurrentFiber();
 }
 
 inline void FiberScheduler::YieldFiber()

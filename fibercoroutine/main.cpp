@@ -9,6 +9,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
 {
 	{
 		FiberScheduler fibers;
+		FiberScheduler fibers2;
 		fibers.EnqueueFiber([&] {
 			for (int i = 0; i < 3; i++)
 			{
@@ -42,9 +43,6 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
 				break;
 			}
 		}
-	}
-	{
-		FiberScheduler fibers2;
 	}
 	std::string str;
 	getline(std::cin, str);
