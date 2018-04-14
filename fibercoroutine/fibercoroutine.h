@@ -92,13 +92,19 @@ inline FiberScheduler::~FiberScheduler()
 			OutputDebugStringA("WARNING: fiber finished but not cleaned.\n");
 		}
 	}
+	ConvertFiberToThread();
 }
 
 inline FiberScheduler::FiberScheduler()
 	: impl_(std::make_unique<PrivateImpl_>())
 {
 	// 初始化scheduler本身的fiber
+	// 这里我们限定：
+	// 1、当前线程之前不能是fiber
+	// 2、scheduler不能嵌套使用
+	// 否则如果两个scheduler交替返回则会造成错误
 	impl_->scheduler = ConvertThreadToFiberEx(nullptr, FIBER_FLAG_FLOAT_SWITCH);
+	assert(impl_->scheduler);
 }
 
 inline void FiberScheduler::YieldFiber()
