@@ -110,11 +110,13 @@ inline void FiberScheduler::YieldFiber()
 
 inline void FiberScheduler::YieldFiberForClock(long long pos_filetime_neg_100ns)
 {
+	assert(GetCurrentFiber() != impl_->scheduler);
 	HANDLE timer = CreateWaitableTimer(nullptr, true, nullptr);
 	LARGE_INTEGER time_li;
 	time_li.QuadPart = pos_filetime_neg_100ns;
 	SetWaitableTimer(timer, &time_li, 0, nullptr, nullptr, false);
-	impl_->currentiter->waittimer = timer;
+	PrivateImpl_::FiberData *pdata = (PrivateImpl_::FiberData *)GetFiberData();
+	pdata->waittimer = timer;
 	SwitchToFiber(impl_->scheduler);
 }
 
